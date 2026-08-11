@@ -19,6 +19,12 @@ class HousePricePredictor:
         self.y_test = None
         self.simple_model = None
         self.multiple_model = None
+        self.X_test_simple = None
+        self.y_test_simple = None
+        self.y_pred_simple = None
+        self.X_test_multi = None
+        self.y_test_multi = None
+        self.y_pred_multi = None
     
     def create_dataset(self):
         """Create realistic house price dataset"""
@@ -101,11 +107,11 @@ class HousePricePredictor:
         self.y_pred_simple = y_pred
         
         # Visualize
-        self.plot_simple_regression(X_train, y_train, X_test, y_test, y_pred)
+        self.plot_simple_regression(X_train, y_train, X_test, y_test, y_pred, model)
         
         return model
     
-    def plot_simple_regression(self, X_train, y_train, X_test, y_test, y_pred):
+    def plot_simple_regression(self, X_train, y_train, X_test, y_test, y_pred, model):
         """Plot simple regression results"""
         fig, axes = plt.subplots(1, 2, figsize=(12, 5))
         fig.suptitle('Simple Linear Regression - House Size vs Price', fontsize=14, fontweight='bold')
@@ -239,6 +245,10 @@ class HousePricePredictor:
     
     def compare_models(self):
         """Compare simple vs multiple regression"""
+        if self.simple_model is None or self.multiple_model is None:
+            print("\n⚠️ Both models must be trained before comparison.")
+            return
+
         print("\n" + "="*50)
         print("📊 MODEL COMPARISON")
         print("="*50)
@@ -258,7 +268,10 @@ class HousePricePredictor:
         print(f"{'R² Score':<15} {r2_simple:.4f}{'':10} {r2_multi:.4f}{'':10} {(r2_multi-r2_simple):.4f}")
         print(f"{'MAE':<15} ${mae_simple:,.0f}{'':9} ${mae_multi:,.0f}{'':10} ${mae_simple-mae_multi:,.0f}")
         
-        improvement = (r2_multi - r2_simple) / r2_simple * 100
+        if r2_simple == 0:
+            improvement = 0
+        else:
+            improvement = (r2_multi - r2_simple) / r2_simple * 100
         print(f"\n📈 Multiple Regression improved accuracy by {improvement:.1f}%")
         
         if r2_multi > r2_simple:
@@ -268,6 +281,10 @@ class HousePricePredictor:
     
     def make_predictions(self):
         """Make predictions on new houses"""
+        if self.simple_model is None or self.multiple_model is None:
+            print("\n⚠️ Train the models before making predictions.")
+            return
+
         print("\n🔮 MAKE PREDICTIONS")
         print("="*50)
         
