@@ -88,32 +88,32 @@ class StudentPassFailPredictor:
         
         # 1. Study Hours vs Pass/Fail
         axes[0, 0].boxplot([self.df[self.df['Pass']==0]['Study_Hours'],
-                           self.df[self.df['Pass']==1]['Study_Hours']],
-                          labels=['Fail', 'Pass'])
+                           self.df[self.df['Pass']==1]['Study_Hours']])
+        axes[0, 0].set_xticklabels(['Fail', 'Pass'])
         axes[0, 0].set_title('Study Hours by Result')
         axes[0, 0].set_ylabel('Study Hours')
         axes[0, 0].grid(True, alpha=0.3)
         
         # 2. Attendance vs Pass/Fail
         axes[0, 1].boxplot([self.df[self.df['Pass']==0]['Attendance'],
-                           self.df[self.df['Pass']==1]['Attendance']],
-                          labels=['Fail', 'Pass'])
+                           self.df[self.df['Pass']==1]['Attendance']])
+        axes[0, 1].set_xticklabels(['Fail', 'Pass'])
         axes[0, 1].set_title('Attendance by Result')
         axes[0, 1].set_ylabel('Attendance %')
         axes[0, 1].grid(True, alpha=0.3)
         
         # 3. Previous GPA vs Pass/Fail
         axes[1, 0].boxplot([self.df[self.df['Pass']==0]['Previous_GPA'],
-                           self.df[self.df['Pass']==1]['Previous_GPA']],
-                          labels=['Fail', 'Pass'])
+                           self.df[self.df['Pass']==1]['Previous_GPA']])
+        axes[1, 0].set_xticklabels(['Fail', 'Pass'])
         axes[1, 0].set_title('Previous GPA by Result')
         axes[1, 0].set_ylabel('GPA')
         axes[1, 0].grid(True, alpha=0.3)
         
         # 4. Test Scores vs Pass/Fail
         axes[1, 1].boxplot([self.df[self.df['Pass']==0]['Test_Scores'],
-                           self.df[self.df['Pass']==1]['Test_Scores']],
-                          labels=['Fail', 'Pass'])
+                           self.df[self.df['Pass']==1]['Test_Scores']])
+        axes[1, 1].set_xticklabels(['Fail', 'Pass'])
         axes[1, 1].set_title('Test Scores by Result')
         axes[1, 1].set_ylabel('Test Score')
         axes[1, 1].grid(True, alpha=0.3)
@@ -174,9 +174,9 @@ class StudentPassFailPredictor:
         
         # Evaluate
         accuracy = accuracy_score(self.y_test, y_pred)
-        precision = precision_score(self.y_test, y_pred)
-        recall = recall_score(self.y_test, y_pred)
-        f1 = f1_score(self.y_test, y_pred)
+        precision = precision_score(self.y_test, y_pred, zero_division=0)
+        recall = recall_score(self.y_test, y_pred, zero_division=0)
+        f1 = f1_score(self.y_test, y_pred, zero_division=0)
         roc_auc = roc_auc_score(self.y_test, y_pred_proba)
         
         print(f"\n✅ Model trained successfully!")
@@ -207,7 +207,7 @@ class StudentPassFailPredictor:
     def evaluate_model(self, y_pred, y_pred_proba):
         """Evaluate and visualize model performance"""
         print("\n📊 Detailed Classification Report:")
-        print(classification_report(self.y_test, y_pred, target_names=['Fail', 'Pass']))
+        print(classification_report(self.y_test, y_pred, target_names=['Fail', 'Pass'], zero_division=0))
         
         # Confusion Matrix
         cm = confusion_matrix(self.y_test, y_pred)
@@ -341,9 +341,9 @@ class StudentPassFailPredictor:
         for threshold in thresholds:
             y_pred_threshold = (self.y_pred_proba >= threshold).astype(int)
             accuracy = accuracy_score(self.y_test, y_pred_threshold)
-            precision = precision_score(self.y_test, y_pred_threshold)
-            recall = recall_score(self.y_test, y_pred_threshold)
-            f1 = f1_score(self.y_test, y_pred_threshold)
+            precision = precision_score(self.y_test, y_pred_threshold, zero_division=0)
+            recall = recall_score(self.y_test, y_pred_threshold, zero_division=0)
+            f1 = f1_score(self.y_test, y_pred_threshold, zero_division=0)
             
             results.append((threshold, accuracy, precision, recall, f1))
             print(f"{threshold:.1f}{'':8} {accuracy:.4f}{'':7} {precision:.4f}{'':7} {recall:.4f}{'':7} {f1:.4f}")
