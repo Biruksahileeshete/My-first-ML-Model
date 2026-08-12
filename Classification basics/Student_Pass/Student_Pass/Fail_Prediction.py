@@ -382,3 +382,10 @@ class StudentPassFailPredictor:
                     break
         
         print("\n✅ Analysis Complete! 🎓")
+# ========================================
+# RUN THE PROGRAM
+# ========================================
+
+if __name__ == "__main__":
+    predictor = StudentPassFailPredictor()
+    predictor.run_full_analysis()
