@@ -159,24 +159,24 @@ class CustomerChurnPredictor:
         
         # 4. Engagement Score vs Churn
         axes[1, 0].boxplot([self.df[self.df['Churn']==0]['Engagement_Score'],
-                           self.df[self.df['Churn']==1]['Engagement_Score']],
-                          labels=['Retained', 'Churned'])
+                           self.df[self.df['Churn']==1]['Engagement_Score']])
+        axes[1, 0].set_xticklabels(['Retained', 'Churned'])
         axes[1, 0].set_title('Engagement Score by Churn')
         axes[1, 0].set_ylabel('Engagement Score')
         axes[1, 0].grid(True, alpha=0.3)
         
         # 5. Monthly Usage vs Churn
         axes[1, 1].boxplot([self.df[self.df['Churn']==0]['Monthly_Usage_Hours'],
-                           self.df[self.df['Churn']==1]['Monthly_Usage_Hours']],
-                          labels=['Retained', 'Churned'])
+                           self.df[self.df['Churn']==1]['Monthly_Usage_Hours']])
+        axes[1, 1].set_xticklabels(['Retained', 'Churned'])
         axes[1, 1].set_title('Monthly Usage by Churn')
         axes[1, 1].set_ylabel('Usage Hours')
         axes[1, 1].grid(True, alpha=0.3)
         
         # 6. Days Since Last Login vs Churn
         axes[1, 2].boxplot([self.df[self.df['Churn']==0]['Days_Since_Last_Login'],
-                           self.df[self.df['Churn']==1]['Days_Since_Last_Login']],
-                          labels=['Retained', 'Churned'])
+                           self.df[self.df['Churn']==1]['Days_Since_Last_Login']])
+        axes[1, 2].set_xticklabels(['Retained', 'Churned'])
         axes[1, 2].set_title('Days Since Last Login by Churn')
         axes[1, 2].set_ylabel('Days')
         axes[1, 2].grid(True, alpha=0.3)
