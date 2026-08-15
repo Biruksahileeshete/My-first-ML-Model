@@ -136,3 +136,40 @@ def train_model(X, y, model_type, params):
     
     model.fit(X, y)
     return model
+# ========================================
+# TRAIN BUTTON
+# ========================================
+
+if st.button("🔮 Predict Price", type="primary"):
+    with st.spinner("Training model..."):
+        
+        # Generate dataset
+        df = generate_dataset(dataset_size)
+        
+        # Prepare features
+        features = ['Size', 'Bedrooms', 'Age', 'Location_Score', 'Garage', 'Pool', 'Renovated']
+        X = df[features]
+        y = df['Price']
+        
+        # Split data
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, random_state=42
+        )
+        
+        # Train model
+        params = {}
+        if model_choice == "Random Forest":
+            params = {'n_estimators': n_estimators, 'max_depth': max_depth}
+        
+        model = train_model(X_train, y_train, model_choice, params)
+        
+        # Make prediction for user input
+        user_features = np.array([[
+            size, bedrooms, age, location_score, 
+            int(garage), int(pool), int(renovated)
+        ]])
+        
+        predicted_price = model.predict(user_features)[0]
+        
+        # Add feature bonus
+        final_price = predicted_price + feature_bonus
