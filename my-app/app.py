@@ -173,3 +173,217 @@ if st.button("🔮 Predict Price", type="primary"):
         
         # Add feature bonus
         final_price = predicted_price + feature_bonus
+         # ========================================
+        # DISPLAY RESULTS
+        # ========================================
+        
+        st.success("✅ Prediction Complete!")
+        
+        # Results columns
+        col1, col2, col3 = st.columns([2, 1, 1])
+        
+        with col1:
+            st.metric(
+                label="🏠 Predicted House Price",
+                value=f"${final_price:,.0f}",
+                delta=f"${final_price - 300000:,.0f} vs average"
+            )
+            
+            # Price category
+            if final_price < 200000:
+                st.info("🏡 Affordable House")
+            elif final_price < 400000:
+                st.success("🏠 Mid-Range House")
+            elif final_price < 600000:
+                st.warning("🏘️ Upscale House")
+            else:
+                st.error("🏰 Luxury House")
+        
+        with col2:
+            st.metric("Model", model_choice)
+            if model_choice == "Random Forest":
+                st.metric("Trees", n_estimators)
+                st.metric("Max Depth", max_depth)
+        
+        with col3:
+            # Model performance
+            y_pred = model.predict(X_test)
+            r2 = r2_score(y_test, y_pred)
+            mae = mean_absolute_error(y_test, y_pred)
+            
+            st.metric("R² Score", f"{r2:.3f}")
+            st.metric("MAE", f"${mae:,.0f}")
+        
+        # ========================================
+        # VISUALIZATIONS
+        # ========================================
+        
+        st.subheader("📊 Price Breakdown")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            # Feature contribution
+            fig, ax = plt.subplots(figsize=(8, 4))
+            
+            contributions = {
+                'Size': size * 150,
+                'Bedrooms': bedrooms * 30000,
+                'Age': -age * 500,
+                'Location': location_score * 10000,
+                'Garage': int(garage) * 15000,
+                'Pool': int(pool) * 25000,
+                'Renovated': int(renovated) * 20000
+            }
+            
+            names = list(contributions.keys())
+            values = list(contributions.values())
+            
+            colors = ['green' if v > 0 else 'red' for v in values]
+            ax.barh(names, values, color=colors)
+            ax.set_xlabel('Price Contribution ($)')
+            ax.set_title('Feature Contributions')
+            ax.axvline(x=0, color='black', linestyle='-', linewidth=0.5)
+            ax.grid(True, alpha=0.3)
+            
+            st.pyplot(fig)
+        
+        with col2:
+            # Actual vs Predicted scatter
+            fig, ax = plt.subplots(figsize=(8, 4))
+            
+            # Sample predictions
+            sample_indices = np.random.choice(len(X_test), 50, replace=False)
+            sample_actual = y_test.iloc[sample_indices]
+            sample_pred = y_pred[sample_indices]
+            
+            ax.scatter(sample_actual, sample_pred, alpha=0.6, color='blue')
+            ax.plot([sample_actual.min(), sample_actual.max()], 
+                   [sample_actual.min(), sample_actual.max()], 
+                   'r--', linewidth=2, label='Perfect Prediction')
+            ax.set_xlabel('Actual Price ($)')
+            ax.set_ylabel('Predicted Price ($)')
+            ax.set_title('Actual vs Predicted')
+            ax.legend()
+            ax.grid(True, alpha=0.3)
+            
+            st.pyplot(fig)
+        
+        # ========================================
+        # PRICE HISTORY CHART
+        # ========================================
+        
+        st.subheader("📈 Price Analysis")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            # Size vs Price
+            fig, ax = plt.subplots(figsize=(8, 4))
+            
+            # Get similar houses
+            similar_houses = df[
+                (df['Bedrooms'] == bedrooms) &
+                (abs(df['Size'] - size) < 500)
+            ]
+            
+            if len(similar_houses) > 0:
+                ax.scatter(similar_houses['Size'], similar_houses['Price'], 
+                          alpha=0.5, color='blue', label='Similar Houses')
+                ax.scatter([size], [final_price], color='red', s=200, 
+                          marker='*', label='Your House')
+                ax.set_xlabel('Size (sq ft)')
+                ax.set_ylabel('Price ($)')
+                ax.set_title('Your House vs Similar Properties')
+                ax.legend()
+                ax.grid(True, alpha=0.3)
+            else:
+                ax.text(0.5, 0.5, 'No similar houses found', 
+                       ha='center', va='center', transform=ax.transAxes)
+            
+            st.pyplot(fig)
+        
+        with col2:
+            # Price by Bedrooms
+            fig, ax = plt.subplots(figsize=(8, 4))
+            
+            bedroom_prices = df.groupby('Bedrooms')['Price'].mean()
+            ax.bar(bedroom_prices.index, bedroom_prices.values, 
+                   color='lightblue', edgecolor='black')
+            ax.axhline(y=final_price, color='red', linestyle='--', 
+                      linewidth=2, label='Your Price')
+            ax.set_xlabel('Number of Bedrooms')
+            ax.set_ylabel('Average Price ($)')
+            ax.set_title('Average Price by Bedrooms')
+            ax.legend()
+            ax.grid(True, alpha=0.3)
+            
+            st.pyplot(fig)
+        
+        # ========================================
+        # FEATURE IMPORTANCE (Random Forest only)
+        # ========================================
+        
+        if model_choice == "Random Forest" and hasattr(model, 'feature_importances_'):
+            st.subheader("🔑 Feature Importance")
+            
+            fig, ax = plt.subplots(figsize=(8, 4))
+            importance = model.feature_importances_
+            feature_names = ['Size', 'Bedrooms', 'Age', 'Location', 'Garage', 'Pool', 'Renovated']
+            
+            indices = np.argsort(importance)
+            ax.barh([feature_names[i] for i in indices], importance[indices], color='teal')
+            ax.set_xlabel('Importance')
+            ax.set_title('Feature Importance')
+            ax.grid(True, alpha=0.3)
+            
+            st.pyplot(fig)
+
+# ========================================
+# SIDEBAR - INFORMATION
+# ========================================
+
+st.sidebar.markdown("---")
+st.sidebar.subheader("📋 How to Use")
+st.sidebar.markdown("""
+1. Enter house features
+2. Select model and parameters
+3. Click **Predict Price**
+4. View results and visualizations
+""")
+
+st.sidebar.markdown("---")
+st.sidebar.subheader("📊 About")
+st.sidebar.markdown("""
+- **Dataset:** Synthetic housing data
+- **Models:** Random Forest & Linear Regression
+- **Features:** Size, Bedrooms, Age, Location
+""")
+
+st.sidebar.markdown("---")
+st.sidebar.caption("🏠 House Price Predictor v1.0")
+
+# ========================================
+# CUSTOM CSS
+# ========================================
+
+st.markdown("""
+<style>
+    .stButton button {
+        width: 100%;
+        background-color: #4CAF50;
+        color: white;
+        font-size: 18px;
+        font-weight: bold;
+        height: 3em;
+    }
+    .stButton button:hover {
+        background-color: #45a049;
+    }
+    .stMetric {
+        background-color: #f0f2f6;
+        padding: 10px;
+        border-radius: 10px;
+    }
+</style>
+""", unsafe_allow_html=True)
