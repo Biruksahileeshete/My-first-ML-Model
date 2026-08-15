@@ -83,3 +83,56 @@ with col3:
     
     # Add bonuses
     feature_bonus = (garage * 15000) + (pool * 25000) + (renovated * 20000)
+    # ========================================
+# GENERATE AND TRAIN MODEL
+# ========================================
+
+@st.cache_data
+def generate_dataset(n_samples=500):
+    """Generate synthetic housing dataset"""
+    np.random.seed(42)
+    
+    data = {
+        'Size': np.random.randint(500, 5000, n_samples),
+        'Bedrooms': np.random.randint(1, 6, n_samples),
+        'Age': np.random.randint(0, 50, n_samples),
+        'Location_Score': np.random.uniform(1, 10, n_samples),
+        'Garage': np.random.choice([0, 1], n_samples),
+        'Pool': np.random.choice([0, 1], n_samples),
+        'Renovated': np.random.choice([0, 1], n_samples),
+        'Price': np.zeros(n_samples)
+    }
+    
+    df = pd.DataFrame(data)
+    
+    # Calculate price
+    for i in range(n_samples):
+        price = (
+            50000 +
+            df.loc[i, 'Size'] * 150 +
+            df.loc[i, 'Bedrooms'] * 30000 -
+            df.loc[i, 'Age'] * 500 +
+            df.loc[i, 'Location_Score'] * 10000 +
+            df.loc[i, 'Garage'] * 15000 +
+            df.loc[i, 'Pool'] * 25000 +
+            df.loc[i, 'Renovated'] * 20000 +
+            np.random.normal(0, 20000)
+        )
+        df.loc[i, 'Price'] = max(50000, min(800000, price))
+    
+    return df
+
+@st.cache_data
+def train_model(X, y, model_type, params):
+    """Train the selected model"""
+    if model_type == "Random Forest":
+        model = RandomForestRegressor(
+            n_estimators=params.get('n_estimators', 100),
+            max_depth=params.get('max_depth', 10),
+            random_state=42
+        )
+    else:
+        model = LinearRegression()
+    
+    model.fit(X, y)
+    return model
